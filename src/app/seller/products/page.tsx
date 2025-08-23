@@ -22,7 +22,7 @@ export default function SellerProductPage() {
     try {
       setLoading(true);
       const userId = sessionStorage.getItem('userId');
-      
+      console.log("session is empty if undefined userid", userId)
       if (!userId) {
         toast.error("Please login first");
         return;

@@ -9,7 +9,8 @@ connect();
 export async function GET(request: NextRequest) {
   try {
     // 1. Get the seller's ID from the authentication token
-    const sellerId = await getDataFromToken(request);
+    const tokendata= await getDataFromToken(request);
+    const sellerId = tokendata.id;
     if (!sellerId) {
       return NextResponse.json(
         { error: "Not authenticated" },

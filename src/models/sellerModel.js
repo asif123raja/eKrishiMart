@@ -63,6 +63,10 @@ const sellerSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // --- ADD THESE TWO FIELDS --- added later
+  verifyToken: String,
+  verifyTokenExpiry: Date,
+  // --- ADD THESE TWO FIELDS --- added later if not working then remove  these 2 fields
   paymentDetails: {
     bankName: String,
     accountNumber: String,

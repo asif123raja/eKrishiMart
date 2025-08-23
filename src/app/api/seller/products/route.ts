@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     // Get userId from headers
     // const userId = req.headers.get('x-user-id');
     const response= await getDataFromToken(req);
-    const userId = response?.id;
+    const userId = response.id;
     console.log("userId from token", userId)
     if (!userId) {
       return NextResponse.json({ error: "User ID not provided" }, { status: 401 });

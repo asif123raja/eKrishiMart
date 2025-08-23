@@ -13,7 +13,8 @@ export async function PUT(
   try {
     // Get userId from headers
     // const userId = req.headers.get('x-user-id');
-    const userId = await getDataFromToken(req);
+    const tokenData= await getDataFromToken(req);
+    const userId = tokenData.id;
     console.log("userId from token", userId);
     if (!userId) {
       return NextResponse.json({ error: "User ID not provided" }, { status: 401 });

@@ -8,7 +8,7 @@ import { getDataFromToken } from '@/helper/getDataFromToken';
 export async function GET(request: NextRequest) {
   try {
     // Decode the token to get the user's data payload
-    const decodedToken = await getDataFromToken(request);
+    const decodedToken = getDataFromToken(request);
 
     if (!decodedToken) {
         return NextResponse.json({ error: "Invalid token" }, { status: 401 });

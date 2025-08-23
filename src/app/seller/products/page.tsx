@@ -21,18 +21,9 @@ export default function SellerProductPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const userId = sessionStorage.getItem('userId');
-      console.log("session is empty if undefined userid", userId)
-      if (!userId) {
-        toast.error("Please login first");
-        return;
-      }
 
-      const res = await fetch("/api/seller/products", {
-        headers: {
-          'x-user-id': userId
-        }
-      });
+      // The browser will automatically send the auth token cookie.
+      const res = await fetch("/api/seller/products");
 
       if (!res.ok) {
         throw new Error(`Failed to fetch: ${res.status}`);
@@ -45,48 +36,6 @@ export default function SellerProductPage() {
       toast.error("Failed to load products");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleQuantityUpdate = async (id: string, newQuantity: number) => {
-    try {
-      setUpdatingId(id);
-      const userId = sessionStorage.getItem('userId');
-      
-      if (!userId) {
-        toast.error("Please login first");
-        return;
-      }
-
-      if (isNaN(newQuantity) || newQuantity < 0) {
-        toast.error("Please enter a valid quantity");
-        return;
-      }
-
-      const res = await fetch(`/api/seller/products/${id}`, {
-        method: "PUT",
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': userId
-        },
-        body: JSON.stringify({ itemQuantity: newQuantity })
-      });
-
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to update");
-      }
-
-      setProducts(prev => 
-        prev.map(p => p._id === id ? { ...p, itemQuantity: newQuantity } : p)
-      );
-      toast.success("Quantity updated successfully");
-    } catch (error) {
-      console.error("Update error:", error);
-      toast.error(error instanceof Error ? error.message : "Update failed");
-    } finally {
-      setUpdatingId(null);
     }
   };
 
@@ -132,16 +81,13 @@ export default function SellerProductPage() {
                   
                   <div className="flex items-center mt-3">
                     <label className="mr-2 font-medium">Quantity:</label>
+                    
                     <input
                       type="number"
                       min="0"
                       defaultValue={product.itemQuantity}
-                      className="border rounded px-2 py-1 w-20"
-                      onBlur={(e) => handleQuantityUpdate(
-                        product._id, 
-                        parseInt(e.target.value) || 0
-                      )}
-                      disabled={updatingId === product._id}
+                      className="border rounded px-2 py-1 w-20 text-black bg-gray-100 cursor-not-allowed" // Added styles for read-only
+                      readOnly // Add this prop to make the field non-editable
                     />
                     {updatingId === product._id && (
                       <span className="ml-2 text-blue-500">Updating...</span>

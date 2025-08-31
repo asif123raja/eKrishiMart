@@ -78,7 +78,7 @@ interface MongooseCache {
 
 // Define global type to extend the global namespace
 declare global {
-  // eslint-disable-next-line no-var
+  // ✅ The eslint-disable comment has been removed
   var mongoose: MongooseCache | undefined;
 }
 

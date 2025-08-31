@@ -6,11 +6,11 @@ import { getDataFromToken } from '@/helper/getDataFromToken';
 connect();
 
 export async function GET(
-  request: NextRequest, 
-  { params }: { params: { orderId: string } }
-) {
+    request: NextRequest, 
+    { params }: { params: { orderId: string } } // ✅ This is the corrected signature
+){
   try {
-    const { orderId } = params;
+    const orderId = params.orderId; 
 
     // 1. Authenticate the user from their token
     const tokenData = await getDataFromToken(request);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
-
+import { getDataFromToken } from "@/helper/getDataFromToken";
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_SECRET_ID!,
@@ -15,7 +15,14 @@ interface RazorpayOrder {
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, currency = 'INR', buyerId } = await request.json();
+    const tokenData = await getDataFromToken(request);
+        if( !tokenData || !tokenData.id){
+                  return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+                }
+    
+            // 2. Access the userId and userEmail from the returned object
+            const buyerId = tokenData.id;
+    const { amount, currency = 'INR', } = await request.json();
 
     // Validate inputs
     if (!amount || isNaN(Number(amount))) {

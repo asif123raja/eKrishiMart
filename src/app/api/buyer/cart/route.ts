@@ -37,7 +37,16 @@ export async function GET(req: NextRequest) {
 // -------------------------------
 export async function DELETE(req: NextRequest) {
   try {
-    const { buyerId, productId } = await req.json();
+    await connect();
+    const tokenData = getDataFromToken(req);
+        if( !tokenData || !tokenData.id){
+           return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+        }
+    const buyerId= tokenData.id;
+    if (!buyerId) {
+      return NextResponse.json({ error: 'Missing buyerId' }, { status: 400 });
+    }
+    const { productId } = await req.json();
 
     if (!buyerId || !productId) {
       return NextResponse.json({ error: 'Missing buyerId or productId' }, { status: 400 });

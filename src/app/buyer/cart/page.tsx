@@ -29,83 +29,73 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const buyerId = typeof window !== 'undefined' ? sessionStorage.getItem('userId') : null;
-
   useEffect(() => {
-    if (!buyerId) {
-        setLoading(false);
-        return;
-    };
-    fetch(`/api/buyer/cart?buyerId=${buyerId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.cart) setCart(data.cart);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error) {
-            toast.error("Failed to fetch cart: " + error.message);
-        } else {
-            toast.error("An unknown error occurred while fetching the cart.");
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [buyerId]);
+    fetchCart();
+  }, []);
 
-  const handleRemove = async (productId: string) => {
-    const res = await fetch('/api/buyer/cart', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ buyerId, productId }),
-    });
+  const fetchCart = async () => {
+    try {
+      const res = await fetch('/api/buyer/cart', {
+        credentials: 'include' // ✅ Send cookies automatically
+      });
 
-    if (res.ok) {
-      toast.success("Item removed");
-      setCart(prev => prev.filter(item => item.productId._id !== productId));
-    } else {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
       const data = await res.json();
-      toast.error(data.error || "Error removing item");
+      if (data.cart) setCart(data.cart);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error("Failed to fetch cart: " + error.message);
+      } else {
+        toast.error("An unknown error occurred while fetching the cart.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  //   const getPriceForQuantity = (item: any): number => {
-  //   const { quantity, productId } = item;
-  //   if (!productId || !productId.pricing) return 0; // Safety check
-    
-  //   const { pricing } = productId;
-  //   // Start with base price or discounted price if available
-  //   let applicablePrice = pricing.discountedPrice ?? pricing.basePrice;
+  const handleRemove = async (productId: string) => {
+    try {
+      const res = await fetch('/api/buyer/cart', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ Send cookies
+        body: JSON.stringify({ productId }), // ✅ REMOVED buyerId
+      });
 
-  //   // Override with bulk price if a better tier is met
-  //   if (pricing.bulkPricing && Array.isArray(pricing.bulkPricing)) {
-  //     // Sort tiers from highest minQuantity to lowest to find the best applicable price
-  //     const sortedTiers = [...pricing.bulkPricing].sort((a, b) => b.minQuantity - a.minQuantity);
-  //     for (const bulk of sortedTiers) {
-  //       if (quantity >= bulk.minQuantity) {
-  //         applicablePrice = bulk.price;
-  //         break; // Found the best tier, no need to check further
-  //       }
-  //     }
-  //   }
-  //   return applicablePrice;
-  // };
+      if (res.ok) {
+        toast.success("Item removed");
+        setCart(prev => prev.filter(item => item.productId._id !== productId));
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Error removing item");
+      }
+    } catch (error) {
+      console.error("Remove item error:", error);
+      toast.error("Failed to remove item");
+    }
+  };
+
   const getPriceForQuantity = (item: CartItem): number => {
-    const { quantity, productId } = item;
-    if (!productId?.pricing) return 0;
-    
-    const { pricing } = productId;
-    let applicablePrice = pricing.discountedPrice ?? pricing.basePrice;
+    const { quantity, productId } = item;
+    if (!productId?.pricing) return 0;
+    
+    const { pricing } = productId;
+    let applicablePrice = pricing.discountedPrice ?? pricing.basePrice;
 
-    if (pricing.bulkPricing?.length) {
-      const sortedTiers = [...pricing.bulkPricing].sort((a, b) => b.minQuantity - a.minQuantity);
-      for (const bulk of sortedTiers) {
-        if (quantity >= bulk.minQuantity) {
-          applicablePrice = bulk.price;
-          break;
-        }
-      }
-    }
-    return applicablePrice;
-  };
+    if (pricing.bulkPricing?.length) {
+      const sortedTiers = [...pricing.bulkPricing].sort((a, b) => b.minQuantity - a.minQuantity);
+      for (const bulk of sortedTiers) {
+        if (quantity >= bulk.minQuantity) {
+          applicablePrice = bulk.price;
+          break;
+        }
+      }
+    }
+    return applicablePrice;
+  };
 
   // ✅ SIMPLIFIED: The calculation now only computes the product subtotal
   const totals = useMemo(() => {

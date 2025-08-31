@@ -83,27 +83,34 @@ const ItemPage: React.FC = () => {
 
 const handleAddToCart = async () => {
   if (itemData) {
-    const qty = Math.min(Math.max(amount, 1), itemData.quantity);
+    try {
+      const qty = Math.min(Math.max(amount, 1), itemData.quantity);
 
-    const buyerId = sessionStorage.getItem("userId");
-    if (!buyerId) return alert("You must be logged in");
+      const res = await fetch("/api/buyer/addtocart", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json" 
+        },
+        credentials: 'include', // ✅ Send cookies automatically
+        body: JSON.stringify({
+          // ✅ REMOVED: buyerId - backend gets it from token
+          productId: itemData._id,
+          sku: itemData.seller?.sku || "DEFAULT",
+          quantity: qty
+        })
+      });
 
-    const res = await fetch("/api/buyer/addtocart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        buyerId,
-        productId: itemData._id, // Changed from id to _id
-        sku: itemData.seller?.sku || "DEFAULT",
-        quantity: qty
-      })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert(`Added ${qty} x ${itemData.name} to cart.`);
-    } else {
-      alert("Failed to add to cart: " + data.error);
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert(`Added ${qty} x ${itemData.name} to cart.`);
+        // Optional: Refresh cart count or update UI
+      } else {
+        alert("Failed to add to cart: " + data.error);
+      }
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      alert("An error occurred while adding to cart");
     }
   }
 };

@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
 // You can also add your DELETE handler to this same file
 export async function DELETE(request: NextRequest) {
     try {
-        const { buyerId, productId } = await request.json();
+        await connect();
+    // Get the buyerId from the URL query parameters
+    const tokenData = getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+      return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+    }        
+    const buyerId= tokenData.id;
+        const { productId } = await request.json();
         if (!buyerId || !productId) {
             return NextResponse.json({ error: "Missing buyerId or productId" }, { status: 400 });
         }

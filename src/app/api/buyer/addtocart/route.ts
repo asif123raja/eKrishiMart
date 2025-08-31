@@ -2,18 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import connect from "@/dbConfig/dbConfig";
 import Buyer from "@/models/userModel";
 import Product from "@/models/productModel";
-
+import { getDataFromToken } from "@/helper/getDataFromToken";
 
 
 export async function POST(req: NextRequest) {
   try {
     await connect();
+    const tokenData = await getDataFromToken(req);
+    
+    if (!tokenData || !tokenData.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    const buyerId = tokenData.id; // ✅ From token, not request body
+    
     const body = await req.json();
-    const { buyerId, productId, sku, quantity } = body;
+    const { productId, sku, quantity } = body; // ✅ REMOVED buyerId from destructuring
 
-    if (!buyerId || !productId || !quantity) {
+    // ✅ Updated validation - no longer checking for buyerId
+    if (!productId || !quantity) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields: productId and quantity are required" },
         { status: 400 }
       );
     }

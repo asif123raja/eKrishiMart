@@ -84,14 +84,27 @@ export async function POST(request: NextRequest) {
             }
         });
 
-    } catch (error: any) {
-        console.error('Signup Error:', error);
-        return NextResponse.json(
-            { 
-                error: "Registration failed",
-                ...(process.env.NODE_ENV === 'development' && { details: error.message })
-            },
-            { status: 500 }
-        );
-    }
+    } catch (error: unknown) {
+    console.error('Signup Error:', error);
+
+    // 1. Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json(
+            { 
+                error: "Registration failed",
+                // 2. Your conditional logic is now safely inside the type guard
+                ...(process.env.NODE_ENV === 'development' && { details: error.message })
+            },
+            { status: 500 }
+        );
+    }
+
+    // 3. Fallback for cases where a non-Error was thrown
+    return NextResponse.json(
+        {
+            error: "An unknown registration error occurred"
+        },
+        { status: 500 }
+    );
+}
 }

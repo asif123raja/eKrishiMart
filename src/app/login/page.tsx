@@ -74,11 +74,15 @@ export default function LoginPage() {
             // if (typeof window !== "undefined") { ... }
             // router.push(data.redirectPath);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
+        if (error instanceof Error) {
             toast.error(error.message);
-        } finally {
-            setLoading(false);
+        } else {
+            toast.error("An unknown error occurred during login.");
         }
+    } finally {
+      setLoading(false);
+    }
     };
 
     return (
@@ -157,6 +161,11 @@ export default function LoginPage() {
                                 <button className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                                     Register as Seller
                                 </button>
+                            </Link>
+                        </div>
+                        <div className="text-sm text-center mt-4">
+                            <Link href="/forgot-password" className="font-medium text-green-600 hover:text-green-500">
+                                Forgot your password?
                             </Link>
                         </div>
                     </div>

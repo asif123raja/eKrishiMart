@@ -49,11 +49,15 @@ export default function CompletedOrdersPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         setOrders(data.orders);
-      } catch (err: any) {
-        toast.error(err.message || "Failed to fetch completed orders.");
-      } finally {
-        setLoading(false);
-      }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+            toast.error(err.message || "Failed to fetch completed orders.");
+        } else {
+            toast.error("An unknown error occurred.");
+        }
+      } finally {
+        setLoading(false);
+      }
     };
     fetchCompletedOrders();
   }, []);

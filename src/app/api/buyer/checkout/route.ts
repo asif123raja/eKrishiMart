@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import connect from "@/dbConfig/dbConfig";
 import Buyer from "@/models/userModel";
+import { getDataFromToken } from "@/helper/getDataFromToken";
 
 connect();
 
 export async function GET(request: NextRequest) {
   try {
     // Get the buyerId from the URL query parameters
-    const buyerId = request.nextUrl.searchParams.get("buyerId");
-
-    if (!buyerId) {
-      return NextResponse.json({ error: "Missing buyerId" }, { status: 400 });
-    }
+    const tokenData = getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+      return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+    }        
+    const buyerId= tokenData.id;
 
     // Find the buyer and populate the product details within their cart
     const buyer = await Buyer.findById(buyerId).populate({
@@ -52,7 +53,10 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({ success: true, message: "Item removed from cart" });
         
-    } catch (error: any) {
+    } catch (error: unknown) {
+    if (error instanceof Error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }

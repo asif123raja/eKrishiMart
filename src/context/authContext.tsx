@@ -46,12 +46,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(false);
         setRole(null);
       }
-    } catch (error) {
-      setIsAuthenticated(false);
-      setRole(null);
-    } finally {
-      setIsLoading(false); // Ensure this is always set to false after the check
-    }
+    } catch (_error: unknown) {
+      setIsAuthenticated(false);
+      setRole(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []); // No dependencies needed here
 
   useEffect(() => {
@@ -71,13 +71,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await axios.get('/api/auth/logout');
       toast.success("Logout successful");
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsAuthenticated(false);
-      setRole(null);
-      router.push("/login");
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+          toast.error(error.message);
+      } else {
+          toast.error("An unknown error occurred during logout.");
+      }
+    } finally {
+      setIsAuthenticated(false);
+      setRole(null);
+      router.push("/login");
+    }
   }, [router]); // Add router dependency
 
   const value = { isAuthenticated, role, login, logout, isLoading };

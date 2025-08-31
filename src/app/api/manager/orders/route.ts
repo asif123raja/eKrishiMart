@@ -1,34 +1,3 @@
-// import { NextRequest, NextResponse } from 'next/server';
-// import connect from '@/dbConfig/dbConfig';
-// import Order from '@/models/orderModel';
-// import { getDataFromToken } from '@/helper/getDataFromToken';
-
-// connect();
-
-// export async function GET(request: NextRequest) {
-//   try {
-//     // 1. Authenticate the manager from their token
-//     const tokenData = await getDataFromToken(request);
-//     if (tokenData.userType !== 'manager' || !tokenData.warehouseId) {
-//       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
-//     }
-//     const managerWarehouseId = tokenData.warehouseId;
-
-//     // 2. Find all orders containing at least one product from the manager's warehouse
-//     // We only fetch orders that are not yet delivered or cancelled
-//     const orders = await Order.find({
-//       'products.warehouseId': managerWarehouseId,
-//       'orderStatus': { $nin: ['delivered', 'cancelled', 'rejected'] }
-//     })
-//     .sort({ createdAt: -1 })
-//     .populate('buyerId', 'username'); // Get the buyer's name
-
-//     return NextResponse.json({ success: true, orders });
-
-//   } catch (error: any) {
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
 import { NextRequest, NextResponse } from 'next/server';
 import connect from '@/dbConfig/dbConfig';
 import Order from '@/models/orderModel';
@@ -40,6 +9,9 @@ connect();
 export async function GET(request: NextRequest) {
   try {
     const tokenData = await getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+      return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+    }
     if (tokenData.userType !== 'manager' || !tokenData.warehouseId) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
@@ -61,7 +33,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, orders });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }

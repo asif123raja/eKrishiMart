@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     // 2. Get the seller's ID from their login token
     const response = await getDataFromToken(request);
-    const sellerId = response.id;
+    const sellerId = response?.id;
     if (!sellerId) {
       return NextResponse.json(
         { error: "Authentication required" },
@@ -29,7 +29,12 @@ export async function GET(request: NextRequest) {
       products: pendingProducts,
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  } catch (error: unknown) {
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+}
 }

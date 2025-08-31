@@ -14,7 +14,7 @@ export async function PUT(
     // Get userId from headers
     // const userId = req.headers.get('x-user-id');
     const tokenData= await getDataFromToken(req);
-    const userId = tokenData.id;
+    const userId = tokenData?.id;
     console.log("userId from token", userId);
     if (!userId) {
       return NextResponse.json({ error: "User ID not provided" }, { status: 401 });
@@ -62,11 +62,21 @@ export async function PUT(
       }
     }, { status: 200 });
 
-  } catch (error: any) {
-    console.error("Error in PUT /api/seller/products:", error);
+  } catch (error: unknown) {
+    console.error("Error in PUT /api/seller/products:", error);
+
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json(
+          { error: error.message || "Internal Server Error" },
+          { status: 500 }
+        );
+    }
+    
+    // Fallback for cases where a non-Error was thrown
     return NextResponse.json(
-      { error: error.message || "Internal Server Error" },
-      { status: 500 }
+        { error: "An unknown internal server error occurred" },
+        { status: 500 }
     );
-  }
+}
 }

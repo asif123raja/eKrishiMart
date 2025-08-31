@@ -16,7 +16,6 @@ type Product = {
 export default function SellerProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -89,9 +88,6 @@ export default function SellerProductPage() {
                       className="border rounded px-2 py-1 w-20 text-black bg-gray-100 cursor-not-allowed" // Added styles for read-only
                       readOnly // Add this prop to make the field non-editable
                     />
-                    {updatingId === product._id && (
-                      <span className="ml-2 text-blue-500">Updating...</span>
-                    )}
                   </div>
                 </div>
               </div>

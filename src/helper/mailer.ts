@@ -1,76 +1,45 @@
 // import nodemailer from 'nodemailer';
-// import bcryptjs from 'bcryptjs';
-// import User from "@/models/userModel";
-// import { use } from 'react';
+// import Seller from '@/models/sellerModel';
+// import crypto from 'crypto';
 
-// // Function to send email and handle user-related operations
-// export const sendEmail = async ({ email, emailType, userId }: { email: string, emailType: string, userId: string }) => {
-//     try {
-//         // Create a hashed token
-//         const hashedToken = await bcryptjs.hash(userId.toString(), 10);
-
-//         // create a user
-//         if( emailType === "VERIFY"){
-//             await User.findByIdAndUpdate(userId,
-//                 {   verifyToken: hashedToken,
-//                     verifyTokenExpiry: Date.now() + 360000
-//                 }
-//             )
-//         }else if( emailType === "RESET"){
-//             await User.findByIdAndUpdate(userId,
-//                 {   forgotPasswordToken: hashedToken,
-//                     forgotPasswordTokenExpiry: Date.now() + 360000
-//                 }
-//             )
-//         }
-
-//         var transport = nodemailer.createTransport({
-//             host: "sandbox.smtp.mailtrap.io",
-//             port: 2525,
-//             auth: {
-//               user: "265360d8c85745",
-//               pass: "1da7366aa7bfeb"
-//               //TODO add these credentials to .env file
-//             }
-//           });
-
-//           const mailOptions ={
-//             from: 'asifulameen044@gmail.com',
-//             to: email,
-//             subject: emailType === "VERIFY" ? "verify your email" : "Reset your password",
-//             html: `<p>Click <a href="${process.env.DOMAIN}/verifyemail?token=${hashedToken}">here</a> to ${emailType === "VERIFY" ? "verify your email":"reset your password"}
-//             or copy and paste the link below in your browser. <br> ${process.env.DOMAIN}/verifyemail? token=${hashedToken}
-//             </p>`
-//           }
-
-//           const mailresponse = await transport.sendMail(mailOptions);
-//           return mailresponse;
-
-//     } catch (error:any) {
-//         throw new Error(error.message);
-//     }
+// // ✅ 1. Define an interface for the function's props to avoid 'any'
+// interface SendEmailProps {
+//   email: string;
+//   emailType: "VERIFY" | "RESET";
+//   userId: string;
+//   token?: string; // Optional, only used for password reset
 // }
 
-// import nodemailer from 'nodemailer';
-// import Seller from '@/models/sellerModel'; // Assuming you'll need to update the Seller
-// import bcryptjs from 'bcryptjs';
-
-// export const sendEmail = async ({ email, emailType, userId }: any) => {
+// export const sendEmail = async ({ email, emailType, userId, token }: SendEmailProps) => {
 //     try {
-//         // 1. Generate a unique, hashed token
-//         const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+//         let emailToken: string;
+//         let subject: string;
+//         let pageLink: string;
+//         let body: string;
 
-//         // 2. Find the user and set the token and expiry date
 //         if (emailType === "VERIFY") {
+//             // Generate verification token and update seller record
+//             emailToken = crypto.randomBytes(32).toString("hex");
 //             await Seller.findByIdAndUpdate(userId, {
-//                 verifyToken: hashedToken,
+//                 verifyToken: emailToken,
 //                 verifyTokenExpiry: Date.now() + 3600000 // 1 hour from now
 //             });
+            
+//             subject = "Verify your email for eKrishiMart";
+//             pageLink = "/seller/verifyemail";
+//             body = `<p>Click <a href="${process.env.DOMAIN}${pageLink}?token=${emailToken}">here</a> to verify your email or copy and paste the link below in your browser. <br> ${process.env.DOMAIN}${pageLink}?token=${emailToken}</p>`;
 //         } 
-//         // Note: You can add logic for "RESET" password here later if needed
-        
+//         else if (emailType === "RESET") {
+//             // Use the provided token (already hashed and saved in API route)
+//             emailToken = token;
+//             subject = "Reset your password for eKrishiMart";
+//             pageLink = "/reset-password";
+//             body = `<p>Click <a href="${process.env.DOMAIN}${pageLink}?token=${emailToken}">here</a> to reset your password or copy and paste the link below in your browser. <br> ${process.env.DOMAIN}${pageLink}?token=${emailToken}</p>`;
+//         }
+//         else {
+//             throw new Error("Invalid email type");
+//         }
 
-//         // 3. Configure email transport (using environment variables is crucial)
 //         const transport = nodemailer.createTransport({
 //             host: process.env.MAILTRAP_HOST,
 //             port: 2525,
@@ -80,45 +49,75 @@
 //             }
 //         });
 
-//         // 4. Construct the email content
-//         const verificationLink = `${process.env.DOMAIN}/verifyemail?token=${hashedToken}`;
-        
 //         const mailOptions = {
-//             from: 'noreply@yourcompany.com',
+//             from: 'noreply@KrishakMart.com',
 //             to: email,
-//             subject: emailType === "VERIFY" ? "Verify your email" : "Reset your password",
-//             html: `<p>Click <a href="${verificationLink}">here</a> to ${emailType === "VERIFY" ? "verify your email" : "reset your password"} or copy and paste the link below in your browser. <br> ${verificationLink}</p>`
+//             subject: subject,
+//             html: body
 //         };
 
-//         // 5. Send the email
 //         const mailresponse = await transport.sendMail(mailOptions);
 //         return mailresponse;
 
-//     } catch (error: any) {
-//         throw new Error(error.message);
-//     }
+//     } catch (error: unknown) {
+//         if (error instanceof Error) {
+//             throw new Error(error.message);
+//         }
+//         throw new Error("An unknown error occurred while sending the email.");
+//     }
 // }
-
- import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 import Seller from '@/models/sellerModel';
-import crypto from 'crypto'; // <-- 1. Import the crypto module
+import crypto from 'crypto';
 
-export const sendEmail = async ({ email, emailType, userId }: any) => {
+// ✅ 1. Define an interface for the function's props to avoid 'any'
+interface SendEmailProps {
+  email: string;
+  emailType: "VERIFY" | "RESET";
+  userId?: string; // Make optional since it's not needed for RESET
+  token?: string; // Optional, only used for password reset
+}
+
+export const sendEmail = async ({ email, emailType, userId, token }: SendEmailProps) => {
     try {
-        // --- 2. REPLACE THE TOKEN GENERATION LOGIC ---
-        // OLD WAY: const hashedToken = await bcryptjs.hash(userId.toString(), 10);
-        // NEW, SAFER WAY:
-        const token = crypto.randomBytes(32).toString("hex");
-        // This creates a secure, random 64-character URL-safe string
+        let emailToken: string;
+        let subject: string;
+        let pageLink: string;
+        let body: string;
 
         if (emailType === "VERIFY") {
+            // Check if userId is provided for VERIFY
+            if (!userId) {
+                throw new Error("User ID is required for verification emails");
+            }
+            
+            // Generate verification token and update seller record
+            emailToken = crypto.randomBytes(32).toString("hex");
             await Seller.findByIdAndUpdate(userId, {
-                verifyToken: token, // <-- 3. Use the new token here
+                verifyToken: emailToken,
                 verifyTokenExpiry: Date.now() + 3600000 // 1 hour from now
             });
+            
+            subject = "Verify your email for eKrishiMart";
+            pageLink = "/seller/verifyemail";
+            body = `<p>Click <a href="${process.env.DOMAIN}${pageLink}?token=${emailToken}">here</a> to verify your email or copy and paste the link below in your browser. <br> ${process.env.DOMAIN}${pageLink}?token=${emailToken}</p>`;
         } 
-        
-        // ... (your nodemailer transport setup remains the same)
+        else if (emailType === "RESET") {
+            // Check if token is provided for RESET
+            if (!token) {
+                throw new Error("Token is required for password reset emails");
+            }
+            
+            // Use the provided token (already hashed and saved in API route)
+            emailToken = token;
+            subject = "Reset your password for eKrishiMart";
+            pageLink = "/reset-password";
+            body = `<p>Click <a href="${process.env.DOMAIN}${pageLink}?token=${emailToken}">here</a> to reset your password or copy and paste the link below in your browser. <br> ${process.env.DOMAIN}${pageLink}?token=${emailToken}</p>`;
+        }
+        else {
+            throw new Error("Invalid email type");
+        }
+
         const transport = nodemailer.createTransport({
             host: process.env.MAILTRAP_HOST,
             port: 2525,
@@ -128,20 +127,20 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
             }
         });
 
-        // Use the new, clean token in the link
-        const verificationLink = `${process.env.DOMAIN}/seller/verifyemail?token=${token}`;
-        
         const mailOptions = {
-            from: 'noreply@yourcompany.com',
+            from: 'noreply@KrishakMart.com',
             to: email,
-            subject: "Verify your email for eKrishiMart",
-            html: `<p>Click <a href="${verificationLink}">here</a> to verify your email or copy and paste the link below in your browser. <br> ${verificationLink}</p>`
+            subject: subject,
+            html: body
         };
 
         const mailresponse = await transport.sendMail(mailOptions);
         return mailresponse;
 
-    } catch (error: any) {
-        throw new Error(error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            throw new Error(error.message);
+        }
+        throw new Error("An unknown error occurred while sending the email.");
     }
 }

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-
+import Image from 'next/image';
 export default function ChatPage() {
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState<{ sender: 'user' | 'AI'; text: string; image?: string }[]>([]);
@@ -41,11 +41,12 @@ export default function ChatPage() {
       });
       const data = await res.json();
       setChat((prev) => [...prev, { sender: 'AI', text: data.response }]);
-    } catch (err) {
-      setChat((prev) => [...prev, { sender: 'AI', text: 'Error fetching response' }]);
-    } finally {
-      setLoading(false);
-    }
+    }  catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      setChat((prev) => [...prev, { sender: 'AI', text: `Error fetching response: ${errorMessage}` }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,12 +76,16 @@ export default function ChatPage() {
             >
               <div>{msg.text}</div>
               {msg.image && (
-                <img
-                  src={msg.image}
-                  alt="uploaded"
-                  className="mt-2 max-w-xs rounded border"
-                />
-              )}
+                // ✅ FIX 3: Use the Next.js <Image> component for optimization.
+                <Image
+                  src={msg.image}
+                  alt="uploaded preview"
+                  width={200} // Provide a width
+                  height={200} // Provide a height
+                  className="mt-2 max-w-xs rounded border"
+                    style={{ height: 'auto', width: 'auto' }} // Maintain aspect ratio
+                />
+              )}
             </div>
           ))}
           {loading && <div className="p-3 bg-gray-600 rounded-lg text-left">AI is thinking...</div>}

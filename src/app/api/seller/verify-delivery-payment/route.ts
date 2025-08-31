@@ -139,13 +139,12 @@ export async function POST(request: NextRequest) {
             message: "Payment verified and product submitted for approval!",
         });
 
-    } catch (error: any) {
-        console.error('💥 Unhandled error in payment verification:', error);
-        console.error('   Error message:', error.message);
-        console.error('   Error stack:', error.stack);
-        
-        return NextResponse.json({ 
-            error: error.message || "Internal server error during payment verification" 
-        }, { status: 500 });
-    }
+    } catch (error: unknown) {
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+}
 }

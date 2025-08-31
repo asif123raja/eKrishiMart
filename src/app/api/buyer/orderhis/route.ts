@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
   try {
     // 1. Authenticate the user from their token
     const tokenData = await getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+               return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+            }
     const buyerId = tokenData.id;
     if (!buyerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -27,7 +30,10 @@ export async function GET(request: NextRequest) {
         orders,
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }

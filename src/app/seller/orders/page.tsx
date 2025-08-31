@@ -39,7 +39,6 @@ interface Order {
 export default function SellerOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-    const [sellerId, setSellerId] = useState<string | null>(null);
 
     useEffect(() => {
         // In a real app, you'd get the seller's ID from your auth context
@@ -56,11 +55,15 @@ export default function SellerOrdersPage() {
                 
                 // The API might return a message instead of an orders array
                 setOrders(data.orders || []);
-            } catch (err: any) {
-                toast.error(err.message);
-            } finally {
-                setLoading(false);
-            }
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    toast.error(error.message);
+                } else {
+                    toast.error("An unknown error occurred.");
+                }
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchOrders();

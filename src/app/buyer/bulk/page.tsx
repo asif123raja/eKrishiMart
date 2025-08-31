@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface BulkPrice {
   minQuantity: number;
@@ -40,10 +41,14 @@ const BulkPricingPage: React.FC = () => {
 
         setProducts(data.products);
         setLoading(false);
-      } catch (err: any) {
-        setError(err.message);
-        setLoading(false);
-      }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+            setError(err.message);
+        } else {
+            setError("An unknown error occurred");
+        }
+        setLoading(false);
+      }
     };
 
     fetchProducts();
@@ -62,11 +67,15 @@ const BulkPricingPage: React.FC = () => {
           className="mb-8 p-6 border rounded-lg shadow-md bg-white"
         >
           <div className="flex flex-col md:flex-row gap-4">
-            <img
-              src={product.imageUrl || "/images/placeholder.png"}
-              alt={product.name}
-              className="w-40 h-40 object-cover rounded-md"
-            />
+            {/* ✅ FIX 2: Use the optimized Next.js Image component */}
+            <Image
+              src={product.imageUrl || "/images/placeholder.png"}
+              alt={product.name}
+              width={160} // 40 * 4 = 160px
+              height={160} // w-40 h-40
+              className="object-cover rounded-md"
+            />
+
 
             <div className="flex-1">
               <h2 className="text-2xl font-semibold mb-2">{product.name}</h2>

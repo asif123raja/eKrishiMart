@@ -63,6 +63,11 @@ const sellerSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+
+  // ✅ ADD THESE TWO FIELDS FOR PASSWORD RESET
+  resetPasswordToken: String,
+  resetPasswordTokenExpiry: Date,
+
   // --- ADD THESE TWO FIELDS --- added later
   verifyToken: String,
   verifyTokenExpiry: Date,

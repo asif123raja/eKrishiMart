@@ -81,6 +81,9 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Authentication
     const tokenData = await getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+      return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+    }
     const buyerId = tokenData.id;
     if (!buyerId) throw new APIError("Unauthorized", 401);
 
@@ -215,22 +218,45 @@ export async function POST(request: NextRequest) {
       deliveryPasscode: newOrder.deliveryPasscode
     });
 
-  } catch (error: any) {
-    await session.abortTransaction();
-    console.error('Order creation failed:', error);
+  } catch (error: unknown) { // 1. Catch the error as 'unknown'
+    await session.abortTransaction();
+    console.error('Order creation failed:', error);
+
+    // 2. Check for your custom APIError first
+    if (error instanceof APIError) {
+        return NextResponse.json(
+          { 
+            success: false,
+            error: error.message,
+            code: error.statusCode 
+          },
+          { status: error.statusCode }
+        );
+    }
     
-    const statusCode = error instanceof APIError ? error.statusCode : 500;
+    // 3. Handle any other standard JavaScript errors
+    if (error instanceof Error) {
+        return NextResponse.json(
+            {
+                success: false,
+                error: error.message || 'Order processing failed'
+            },
+            { status: 500 }
+        );
+    }
+
+    // 4. Fallback for non-Error exceptions
     return NextResponse.json(
-      { 
-        success: false,
-        error: error.message || 'Order processing failed',
-        ...(error instanceof APIError && { code: error.statusCode }) 
-      },
-      { status: statusCode }
+        {
+            success: false,
+            error: 'An unknown error occurred during order processing'
+        },
+        { status: 500 }
     );
-  } finally {
-    session.endSession();
-  }
+
+  } finally {
+    session.endSession();
+  }
 }
 
 // Helper function to calculate delivery charge

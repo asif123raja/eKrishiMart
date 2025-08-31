@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Define a type for the order data
 interface Order {
@@ -51,11 +52,15 @@ export default function OrderHistoryPage() {
         }
 
         setOrders(data.orders);
-      } catch (err: any) {
-        toast.error(err.message);
-      } finally {
-        setLoading(false);
-      }
+      }catch (error: unknown) {
+        if (error instanceof Error) {
+            toast.error(error.message);
+        } else {
+            toast.error("An unknown error occurred.");
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchOrders();
@@ -100,11 +105,14 @@ export default function OrderHistoryPage() {
                 <div className="space-y-4">
                     {order.products.map(product => (
                         <div key={product._id} className="flex items-center gap-4">
-                            <img 
-                                src={product.productId?.imageUrl || '/images/placeholder.png'} 
-                                alt={product.name}
-                                className="w-16 h-16 object-cover rounded-md"
-                            />
+                            {/* ✅ 3. Replace <img> with the optimized <Image> component */}
+                            <Image 
+                                src={product.productId?.imageUrl || '/images/placeholder.png'} 
+                                alt={product.name}
+                                width={64} // Corresponds to w-16
+                                height={64} // Corresponds to h-16
+                                className="w-16 h-16 object-cover rounded-md"
+                            />
                             <div>
                                 <p className="font-semibold">{product.name}</p>
                                 <p className="text-sm text-gray-600">Quantity: {product.quantity}</p>

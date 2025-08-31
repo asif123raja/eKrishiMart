@@ -1,171 +1,3 @@
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import toast from 'react-hot-toast';
-
-// // Define a type for the order data
-// interface Order {
-//   _id: string;
-//   orderStatus: string;
-//   createdAt: string;
-//   buyerId: { username: string };
-//   orderTotal: { grandTotal: number };
-//   products: Array<{
-//     _id: string;
-//     name: string;
-//     quantity: number;
-//     warehouseId: string;
-//   }>;
-// }
-
-// // Helper to get a color for the order status
-// const getStatusColor = (status: string) => {
-//     // ... (same helper function as in the buyer's order history page)
-// };
-
-// export default function ManagerOrdersPage() {
-//   const [orders, setOrders] = useState<Order[]>([]);
-//   const [loading, setLoading] = useState(true);
-  
-//   // State for the completion modal
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-//   const [passcode, setPasscode] = useState('');
-
-//   const fetchOrders = async () => {
-//     try {
-//       const res = await fetch('/api/manager/orders');
-//       const data = await res.json();
-//       if (!res.ok) throw new Error(data.error);
-//       setOrders(data.orders);
-//     } catch (err: any) {
-//       toast.error(err.message || "Failed to fetch orders.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchOrders();
-//   }, []);
-
-//   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
-//     try {
-//         const res = await fetch(`/api/manager/orders/${orderId}`, {
-//             method: 'PUT',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ action: 'update_status', payload: { newStatus } }),
-//         });
-//         const data = await res.json();
-//         if (!res.ok) throw new Error(data.error);
-        
-//         toast.success(`Order ${orderId} status updated to ${newStatus}`);
-//         fetchOrders(); // Refresh the list
-//     } catch (err: any) {
-//         toast.error(err.message);
-//     }
-//   };
-
-//   const handleCompleteOrder = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!selectedOrder || !passcode) return;
-//     try {
-//         const res = await fetch(`/api/manager/orders/${selectedOrder._id}`, {
-//             method: 'PUT',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ action: 'complete_order', payload: { passcode } }),
-//         });
-//         const data = await res.json();
-//         if (!res.ok) throw new Error(data.error);
-        
-//         toast.success(`Order ${selectedOrder._id} marked as delivered!`);
-//         setIsModalOpen(false);
-//         setPasscode('');
-//         fetchOrders(); // Refresh the list
-//     } catch(err: any) {
-//         toast.error(err.message);
-//     }
-//   };
-
-//   const openCompletionModal = (order: Order) => {
-//     setSelectedOrder(order);
-//     setIsModalOpen(true);
-//   };
-
-//   if (loading) return <p className="text-center p-8">Loading orders...</p>;
-
-//   return (
-//     <>
-//       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-//         <div className="max-w-7xl mx-auto">
-//           <h1 className="text-3xl font-bold mb-6">Warehouse Order Management</h1>
-//           {orders.length === 0 ? (
-//             <p>No active orders for your warehouse.</p>
-//           ) : (
-//             <div className="space-y-6">
-//               {orders.map((order) => (
-//                 <div key={order._id} className="bg-white p-6 rounded-lg shadow-md">
-//                   <div className="flex justify-between items-start">
-//                     <div>
-//                       <p className="font-semibold text-sm text-gray-600">Order ID: {order._id}</p>
-//                       <p>Buyer: {order.buyerId?.username || 'N/A'}</p>
-//                     </div>
-//                     <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.orderStatus)}`}>
-//                         {order.orderStatus}
-//                     </span>
-//                   </div>
-//                   <hr className="my-4"/>
-//                   <div>
-//                     <h3 className="font-semibold mb-2">Products in this Order:</h3>
-//                     {order.products.map(p => (
-//                         <p key={p._id} className="text-sm text-gray-700">{p.quantity} x {p.name}</p>
-//                     ))}
-//                   </div>
-//                    <div className="mt-4 flex flex-wrap gap-2">
-//                       <select onChange={(e) => handleStatusUpdate(order._id, e.target.value)} value={order.orderStatus} className="p-2 border rounded text-sm">
-//                         <option value="pending">Pending</option>
-//                         <option value="processing">Processing</option>
-//                         <option value="shipped">Shipped</option>
-//                         <option value="out_for_delivery">Out for Delivery</option>
-//                         <option value="rejected">Reject</option>
-//                       </select>
-//                       <button onClick={() => openCompletionModal(order)} className="px-4 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700">
-//                           Complete with Passcode
-//                       </button>
-//                    </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       {/* Passcode Completion Modal */}
-//       {isModalOpen && selectedOrder && (
-//          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-//           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-//             <h2 className="text-2xl font-bold mb-4">Complete Order</h2>
-//             <p className="mb-4 text-sm">Enter the 6-digit passcode provided by the buyer for order <span className="font-mono">{selectedOrder._id}</span>.</p>
-//             <form onSubmit={handleCompleteOrder}>
-//                 <input 
-//                     type="text" 
-//                     value={passcode}
-//                     onChange={(e) => setPasscode(e.target.value)}
-//                     maxLength={6}
-//                     className="w-full p-3 border rounded text-2xl tracking-widest text-center"
-//                     required
-//                 />
-//                 <div className="mt-6 flex justify-end gap-4">
-//                     <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-//                     <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Confirm Delivery</button>
-//                 </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-//     </>
-//   );
-// }
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -231,11 +63,15 @@ export default function ManagerOrdersPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch orders.");
       setOrders(data.orders);
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+          toast.error(error.message);
+      } else {
+          toast.error("An unknown error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -255,9 +91,13 @@ export default function ManagerOrdersPage() {
         
         toast.success(`Order status updated to ${newStatus}`);
         fetchOrders(); // Refresh the list to show the change
-    } catch (err: any) {
-        toast.error(err.message);
-    }
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            toast.error(error.message);
+        } else {
+            toast.error("An unknown error occurred.");
+        }
+    }
   };
 
   // ✅ Handles completing an order with the passcode
@@ -277,9 +117,13 @@ export default function ManagerOrdersPage() {
         setIsModalOpen(false);
         setPasscode('');
         fetchOrders(); // Refresh the list (completed order will disappear)
-    } catch(err: any) {
-        toast.error(err.message);
-    }
+    } catch(error: unknown) {
+        if (error instanceof Error) {
+            toast.error(error.message);
+        } else {
+            toast.error("An unknown error occurred.");
+        }
+    }
   };
 
   // ✅ Opens the passcode modal

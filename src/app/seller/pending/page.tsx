@@ -34,11 +34,16 @@ export default function PendingProductsPage() {
         }
         
         setProducts(data.products || []);
-      } catch (error: any) {
-        toast.error(error.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+            toast.error(error.message);
+        } else {
+            toast.error("An unknown error occurred.");
+        }
+      } finally {
+        setLoading(false);
+      }
+
     };
 
     fetchPendingProducts();

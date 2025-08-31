@@ -51,13 +51,17 @@ export default function OrderSuccessPage() {
         }
 
         setOrder(data.order);
-      } catch (err: any) {
-        toast.error(err.message);
-        router.push('/'); // Redirect home if order not found or error
-      } finally {
-        setLoading(false);
-      }
-    };
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+            toast.error(err.message);
+        } else {
+            toast.error("An unknown error occurred.");
+        }
+        router.push('/'); // Redirect home if order not found or error
+    } finally {
+        setLoading(false);
+      }
+    };
 
     fetchOrderDetails();
   }, [orderId, router]);

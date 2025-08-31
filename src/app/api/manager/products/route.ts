@@ -37,10 +37,19 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ products: pendingProducts });
 
-  } catch (error: any) {
-    console.error("Manager dashboard error:", error);
+  } catch (error: unknown) {
+    console.error("Manager dashboard error:", error);
+
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ 
+            error: error.message || "Internal server error" 
+        }, { status: 500 });
+    }
+    
+    // Fallback for cases where a non-Error was thrown
     return NextResponse.json({ 
-      error: error.message || "Internal server error" 
+        error: "An unknown internal server error occurred" 
     }, { status: 500 });
-  }
+}
 }

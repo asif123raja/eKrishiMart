@@ -14,6 +14,9 @@ export async function GET(
 
     // 1. Authenticate the user from their token
     const tokenData = await getDataFromToken(request);
+        if( !tokenData || !tokenData.id){
+                   return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+       }
     const buyerId = tokenData.id;
     if (!buyerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,10 +45,19 @@ export async function GET(
         order: orderWithPasscode
     });
 
-  } catch (error: any) {
-    if (error.kind === 'ObjectId') {
-        return NextResponse.json({ error: "Invalid Order ID format" }, { status: 400 });
-    }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    // First, check if the error is a standard Error object
+    if (error instanceof Error) {
+        // Now that we know it's an error, we can check for Mongoose-specific properties.
+        // We use a type assertion here to check the 'kind' property.
+        if ((error as any).kind === 'ObjectId') {
+            return NextResponse.json({ error: "Invalid ID format. Please check the ID." }, { status: 400 });
+        }
+        // For all other standard errors, return the general message.
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
   }
 }

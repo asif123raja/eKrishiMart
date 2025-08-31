@@ -235,6 +235,9 @@ export async function POST(request: NextRequest) {
 
     // 2. Get authenticated user
     const tokenData = await getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+                  return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+                }
     const buyerId = tokenData.id;
     if (!buyerId) throw new Error('Unauthorized');
 
@@ -359,14 +362,26 @@ export async function POST(request: NextRequest) {
       grandTotal
     });
 
-  } catch (error: any) {
-    await session.abortTransaction();
-    console.error('Payment verification failed:', error.message);
-    return NextResponse.json(
-      { error: error.message || 'Payment processing failed' },
-      { status: error.statusCode || 500 }
+  } catch (error: unknown) {
+    await session.abortTransaction();
+    console.error('Payment verification failed:', error);
+
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        // Check if it's a custom error with a status code
+        const statusCode = (error as any).statusCode || 500;
+        return NextResponse.json(
+          { error: error.message || 'Payment processing failed' },
+          { status: statusCode }
+        );
+    }
+
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json(
+        { error: 'An unknown payment processing error occurred' }, 
+        { status: 500 }
     );
-  } finally {
-    session.endSession();
-  }
+  } finally {
+    session.endSession();
+  }
 }

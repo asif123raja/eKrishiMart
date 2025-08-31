@@ -13,8 +13,12 @@ export async function POST(request: NextRequest) {
     try {
         await connect(); // ✅ ADD THIS LINE to ensure a stable connection
 
-        const { id } = getDataFromToken(request);
-        const seller = await Seller.findById(id);
+        const tokenData = await getDataFromToken(request);
+        if( !tokenData || !tokenData.id){
+          return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+        }
+        const buyerId = tokenData.id;
+        const seller = await Seller.findById(buyerId);
 
         if (!seller) {
             return NextResponse.json({ error: "Seller not found" }, { status: 404 });
@@ -38,7 +42,12 @@ export async function POST(request: NextRequest) {
             vehicleType: vehicle,
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    } catch (error: unknown) {
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+}
 }

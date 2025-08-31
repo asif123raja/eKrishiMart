@@ -14,7 +14,13 @@ export async function GET() {
         });
 
         return response;
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) { 
+        // ✅ 2. Check if it's an instance of an Error
+        if (error instanceof Error) {
+            // Now TypeScript knows error has a 'message' property
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+        // Handle cases where a non-Error was thrown
+        return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
     }
 }

@@ -3,8 +3,6 @@
 import Link from "next/link";
 import Image from "next/image"; // Import the Next.js Image component
 import React, { useEffect } from "react";
-import { FaApple, FaCarrot, FaBoxOpen } from "react-icons/fa"; // Import icons or use images as needed
-
 const FrontPage: React.FC = () => {
   useEffect(() => {
     const elements = document.querySelectorAll(".fade-in");

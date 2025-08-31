@@ -9,10 +9,13 @@ connect();
 // In your PUT/POST endpoints:
 export async function POST(request: NextRequest) {
   try {
-    const tokenData = await getDataFromToken(request);
+    const tokenData = getDataFromToken(request);
+    if (!tokenData || !tokenData.id) {
+        return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
+    }
     const buyerId = tokenData.id;
-    const { _id, ...newAddress } = await request.json(); // Destructure properly
-
+    // const { _id, ...newAddress } = await request.json(); // Destructure properly
+    const { __id, ...newAddress } = await request.json();
     // Validate required fields
     const required = ['addressLine1', 'city', 'state', 'pincode'];
     for (const field of required) {
@@ -35,18 +38,21 @@ export async function POST(request: NextRequest) {
       shippingAddresses: updatedBuyer.shippingAddresses
     });
 
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "Server error" },
-      { status: 500 }
-    );
-  }
+  }catch (error: unknown) {
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }
 
 // PUT - Update an existing shipping address
 export async function PUT(request: NextRequest) {
     try {
-        const tokenData = await getDataFromToken(request);
+        const tokenData = getDataFromToken(request);
+        if (!tokenData || !tokenData.id) {
+          return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
+        }
         const buyerId = tokenData.id;
         if (!buyerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -79,7 +85,10 @@ export async function PUT(request: NextRequest) {
             shippingAddresses: updatedBuyer.shippingAddresses,
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+    if (error instanceof Error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
+        return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+    }
 }

@@ -1,41 +1,3 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import connect from "@/dbConfig/dbConfig";
-// import Buyer from "@/models/userModel"; // Assuming this is the Buyer model
-// import Product from "@/models/productModel"; // Ensure this is defined and exported
-
-// connect();
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     const body = await req.json();
-//     const { buyerId, productId, sku, quantity } = body;
-
-//     if (!buyerId || !productId || !sku || !quantity) {
-//       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-//     }
-
-//     const buyer = await Buyer.findById(buyerId);
-//     if (!buyer) {
-//       return NextResponse.json({ error: "Buyer not found" }, { status: 404 });
-//     }
-
-//     const existingItem = buyer.cart.find(
-//       (item: any) => item.productId.toString() === productId && item.sku === sku
-//     );
-
-//     if (existingItem) {
-//       existingItem.quantity += quantity;
-//     } else {
-//       buyer.cart.push({ productId, sku, quantity });
-//     }
-
-//     await buyer.save();
-//     return NextResponse.json({ success: true, message: "Item added to cart" });
-//   } catch (error: any) {
-//     console.error(error);
-//     return NextResponse.json({ error: error.message }, { status: 500 });
-//   }
-// }
 import { NextRequest, NextResponse } from "next/server";
 import connect from "@/dbConfig/dbConfig";
 import Buyer from "@/models/userModel";
@@ -94,12 +56,12 @@ export async function POST(req: NextRequest) {
       success: true,
       cart: buyer.cart
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "Server error" },
-      { status: 500 }
-    );
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }
 
 export async function GET(req: NextRequest) {
@@ -137,10 +99,10 @@ export async function GET(req: NextRequest) {
         sku: item.sku
       }))
     });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "Server error" },
-      { status: 500 }
-    );
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }

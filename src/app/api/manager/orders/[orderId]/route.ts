@@ -12,6 +12,9 @@ export async function PUT(request: NextRequest, { params }: { params: { orderId:
 
     // 1. Authenticate the manager
     const tokenData = await getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+      return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+    }
     if (tokenData.userType !== 'manager' || !tokenData.warehouseId) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
@@ -51,7 +54,10 @@ export async function PUT(request: NextRequest, { params }: { params: { orderId:
 
     return NextResponse.json({ success: true, order: updatedOrder });
 
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "An unknown server error occurred" }, { status: 500 });
+  }
 }

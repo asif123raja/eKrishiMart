@@ -1,89 +1,3 @@
-// // routes/approval.js
-// import connect from '@/dbConfig/dbConfig';
-// import PendingProduct from '@/models/pendingProductModel';
-// import Product from '@/models/productModel';
-// import { NextRequest, NextResponse } from 'next/server';
-// import jwt from 'jsonwebtoken';
-// import { cookies } from 'next/headers';
-// import Warehouse from '@/models/warehouseModel';
-
-// connect();
-
-// // Manager approves product
-// export async function POST(request: NextRequest) {
-//   try {
-//     // Verify manager token
-//     const cookieStore =await cookies();
-//     const token = cookieStore.get('token')?.value;
-    
-//     if (!token) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-
-//     const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as { id: string, role: string };
-    
-//     if (decoded.role !== 'manager') {
-//       return NextResponse.json({ error: "Access denied" }, { status: 403 });
-//     }
-
-//     const { productId, action, reason } = await request.json();
-    
-//     // Find pending product
-//     const pendingProduct = await PendingProduct.findById(productId);
-//     if (!pendingProduct) {
-//       return NextResponse.json({ error: "Product not found" }, { status: 404 });
-//     }
-
-//     // Verify manager oversees this warehouse
-//     const warehouse = await Warehouse.findOne({ 
-//       _id: pendingProduct.warehouseId, 
-//       manager: decoded.id 
-//     });
-    
-//     if (!warehouse) {
-//       return NextResponse.json({ error: "Not authorized to review this product" }, { status: 403 });
-//     }
-
-//     if (action === 'approve') {
-//       // Create actual product
-//       const newProduct = new Product({
-//         ...pendingProduct.toObject(),
-//         status: 'active'
-//       });
-//       await newProduct.save();
-      
-//       // Update pending product
-//       pendingProduct.status = 'approved';
-//       pendingProduct.reviewedBy = decoded.id;
-//       pendingProduct.reviewedAt = new Date();
-//       await pendingProduct.save();
-      
-//       return NextResponse.json({ 
-//         message: "Product approved successfully",
-//         product: newProduct 
-//       });
-      
-//     } else if (action === 'reject') {
-//       pendingProduct.status = 'rejected';
-//       pendingProduct.rejectionReason = reason;
-//       pendingProduct.reviewedBy = decoded.id;
-//       pendingProduct.reviewedAt = new Date();
-//       await pendingProduct.save();
-      
-//       return NextResponse.json({ 
-//         message: "Product rejected",
-//         product: pendingProduct 
-//       });
-//     }
-
-//   } catch (error: any) {
-//     console.error("Manager dashboard error:", error);
-//     return NextResponse.json({ 
-//       error: error.message || "Internal server error" 
-//     }, { status: 500 });
-//   }
-// }
-
 import connect from '@/dbConfig/dbConfig';
 import PendingProduct from '@/models/pendingProductModel';
 import Product from '@/models/productModel';
@@ -152,9 +66,16 @@ export async function POST(request: NextRequest) {
       success: true,
     });
 
-  } catch (error: any) {
-    await session.abortTransaction();
-    session.endSession();
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  }  catch (error: unknown) {
+    await session.abortTransaction();
+    session.endSession();
+
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+}
 }

@@ -1,85 +1,3 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import Warehouse from "@/models/warehouseModel";
-// import Seller from "@/models/sellerModel";
-// import Product from "@/models/productModel";
-// import connect from "@/dbConfig/dbConfig";
-// import { Types } from "mongoose";
-
-// connect();
-
-// export async function PUT(
-//   req: NextRequest,
-//   { params }: { params: { productId: string } }
-// ) {
-//   try {
-//     const managerId = req.headers.get('x-user-id');
-    
-//     if (!managerId || !Types.ObjectId.isValid(managerId)) {
-//       return NextResponse.json({ error: "Invalid Manager ID" }, { status: 401 });
-//     }
-
-//     const { quantity } = await req.json();
-    
-//     if (typeof quantity !== 'number' || quantity < 0) {
-//       return NextResponse.json(
-//         { error: "Invalid quantity value" },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Verify manager's warehouse
-//     const warehouse = await Warehouse.findOne({ 
-//       "manager._id": new Types.ObjectId(managerId) 
-//     }).select("serviceablePincodes");
-
-//     if (!warehouse) {
-//       return NextResponse.json({ error: "Warehouse not found" }, { status: 404 });
-//     }
-
-//     // Get product with seller info
-//     const product = await Product.findById(params.productId)
-//       .populate<{ sellerId: { businessAddress: { pincode: string } } }>({
-//         path: 'sellerId',
-//         select: 'businessAddress.pincode'
-//       });
-
-//     if (!product) {
-//       return NextResponse.json({ error: "Product not found" }, { status: 404 });
-//     }
-
-//     // Check if seller's pincode is in warehouse's serviceable pincodes
-//     if (!warehouse.serviceablePincodes.includes(product.sellerId.businessAddress.pincode)) {
-//       return NextResponse.json(
-//         { error: "Not authorized to update this product" },
-//         { status: 403 }
-//       );
-//     }
-
-//     // Update product
-//     const updatedProduct = await Product.findByIdAndUpdate(
-//       params.productId,
-//       { itemQuantity: quantity },
-//       { new: true }
-//     ).select("name sku itemQuantity");
-
-//     return NextResponse.json({
-//       message: "Quantity updated successfully",
-//       product: {
-//         _id: updatedProduct._id.toString(),
-//         name: updatedProduct.name,
-//         sku: updatedProduct.sku,
-//         quantity: updatedProduct.itemQuantity
-//       }
-//     }, { status: 200 });
-
-//   } catch (error: any) {
-//     console.error("Error in PUT /api/manager/sellerProducts:", error);
-//     return NextResponse.json(
-//       { error: error.message || "Internal Server Error" },
-//       { status: 500 }
-//     );
-//   }
-// }
 import { NextRequest, NextResponse } from "next/server";
 import Warehouse from "@/models/warehouseModel";
 import Product from "@/models/productModel";
@@ -138,8 +56,15 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
             quantity: updatedProduct.itemQuantity
         }
     }, { status: 200 });
-  } catch (error: any) {
-    console.error("PUT /api/manager/sellerProducts Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
+  } catch (error: unknown) {
+    console.error("PUT /api/manager/sellerProducts Error:", error);
+
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown internal server error occurred" }, { status: 500 });
+}
 }

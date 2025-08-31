@@ -9,8 +9,11 @@ connect();
 export async function GET(request: NextRequest) {
   try {
     // 1. Get the seller's ID from the authentication token
-    const tokendata= await getDataFromToken(request);
-    const sellerId = tokendata.id;
+    const tokenData= await getDataFromToken(request);
+    if( !tokenData || !tokenData.id){
+          return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+    }
+    const sellerId = tokenData.id;
     if (!sellerId) {
       return NextResponse.json(
         { error: "Not authenticated" },
@@ -43,7 +46,12 @@ export async function GET(request: NextRequest) {
       orders: orders,
     });
     
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+ } catch (error: unknown) {
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+}
 }

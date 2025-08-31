@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 // ✅ Define more detailed types to match the new data from the API
 interface SellerDetails {
@@ -49,11 +50,15 @@ export default function ApprovalsPage() {
         if (!response.ok) throw new Error('Failed to fetch data');
         const data = await response.json();
         setPendingProducts(data);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+            setError(error.message);
+        } else {
+            setError("An unknown error occurred.");
+        }
+      } finally {
+        setLoading(false);
+      }
     };
     fetchPendingProducts();
   }, []);
@@ -76,9 +81,13 @@ export default function ApprovalsPage() {
       );
       alert(`Product successfully ${action}d!`);
 
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
-    }
+    }catch (error: unknown) {
+      if (error instanceof Error) {
+          toast.error(`Error: ${error.message}`);
+      } else {
+          toast.error("An unknown error occurred.");
+      }
+    }
   };
 
   if (loading) return <p className="text-center mt-8">Loading pending products...</p>;

@@ -68,11 +68,15 @@ export default function BuyerSignup() {
             toast.success("Account created successfully!");
             router.push('/login');
             
-        } catch (error: any) {
+        } catch (error: unknown) {
+        if (error instanceof Error) {
             toast.error(error.message);
-        } finally {
-            setLoading(false);
+        } else {
+            toast.error("An unknown error occurred during signup.");
         }
+    } finally {
+      setLoading(false);
+    }
     };
 
     return (

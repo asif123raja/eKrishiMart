@@ -46,19 +46,54 @@ export async function POST(request: NextRequest) {
       receipt: order.receipt
     });
 
-  } catch (err: any) {
-    console.error('Payment Error:', {
-      error: err.error?.description || err.message,
-      code: err.error?.code,
-      status: err.statusCode
-    });
+  } catch (error: unknown) {
+    // First, check for the specific, nested error structure from the payment API
+    if (
+        error &&
+        typeof error === 'object' &&
+        'error' in error && 
+        error.error && 
+        typeof error.error === 'object'
+    ) {
+        // Assert the type now that we've confirmed its shape
+        const apiError = error as {
+            statusCode?: number;
+            message?: string;
+            error: {
+                description?: string;
+                code?: string;
+            }
+        };
 
+        const errorMessage = apiError.error.description || apiError.message || 'Payment processing failed';
+        const errorCode = apiError.error.code || 'UNKNOWN_ERROR';
+        const statusCode = apiError.statusCode || 500;
+        
+        console.error('Payment Error:', {
+            error: errorMessage,
+            code: errorCode,
+            status: statusCode
+        });
+
+        return NextResponse.json(
+            { error: errorMessage, code: errorCode },
+            { status: statusCode }
+        );
+    }
+    
+    // Fallback for standard JavaScript errors
+    if (error instanceof Error) {
+        console.error('Payment Error:', error);
+        return NextResponse.json(
+            { error: error.message },
+            { status: 500 }
+        );
+    }
+
+    // Fallback for any other type of exception
     return NextResponse.json(
-      {
-        error: err.error?.description || 'Payment processing failed',
-        code: err.error?.code || 'UNKNOWN_ERROR'
-      },
-      { status: err.statusCode || 500 }
+        { error: 'An unknown error occurred during payment processing' },
+        { status: 500 }
     );
-  }
+}
 }

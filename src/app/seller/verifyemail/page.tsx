@@ -15,12 +15,17 @@ export default function VerifyEmailPage() {
             await axios.post('/api/seller/verifyEmail', { token });
             setVerified(true);
             setError(false);
-        } catch (error: any) {
-            setError(true);
-            console.log(error.response?.data || "Verification failed");
+        } catch (error: unknown) {
+            setError(true);
+            if (error instanceof Error) {
+                console.error("Verification failed:", (error as any).response?.data || error.message);
+            } else {
+                console.error("An unknown error occurred during verification");
+            }
         } finally {
             setLoading(false);
         }
+
     };
 
     useEffect(() => {
@@ -30,12 +35,13 @@ export default function VerifyEmailPage() {
     }, []);
 
     useEffect(() => {
-        if (token.length > 0) {
-            verifyUserEmail();
-        } else {
-            setLoading(false); // No token found, stop loading
-        }
-    }, [token]);
+        if (token.length > 0) {
+            verifyUserEmail();
+        } else {
+            setLoading(false);
+        }
+    // ✅ 4. Add the memoized function to the dependency array
+    }, [token, verifyUserEmail]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-50">

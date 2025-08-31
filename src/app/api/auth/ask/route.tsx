@@ -24,7 +24,8 @@ export async function POST(req: NextRequest) {
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
 
     return NextResponse.json({ response: text });
-  } catch (err) {
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
-  }
+  } catch (error: any) { // Rename to 'error' and type as 'any'
+    console.error("Error calling Gemini API:", error); // Log the actual error
+    return NextResponse.json({ error: 'Internal error: ' + error.message }, { status: 500 });
+}
 }

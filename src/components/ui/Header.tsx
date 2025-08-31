@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaBars, FaTimes, FaShoppingCart } from "react-icons/fa";
 import Link from "next/link";
 import Image from 'next/image';

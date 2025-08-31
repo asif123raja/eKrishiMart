@@ -1,114 +1,3 @@
-// // app/api/warehouse/add/route.ts
-
-// import { NextRequest, NextResponse } from 'next/server';
-// import connect from '@/dbConfig/dbConfig';
-// import Warehouse from '@/models/warehouseModel';
-
-// connect();
-
-// export async function POST(request: NextRequest) {
-//   try {
-//     const body = await request.json();
-//     const { name, pincodes } = body;
-
-//     if (!name || !pincodes || !Array.isArray(pincodes) || pincodes.length !== 5) {
-//       return NextResponse.json(
-//         { error: "Name and exactly 5 pincodes are required." },
-//         { status: 400 }
-//       );
-//     }
-
-//     const existing = await Warehouse.findOne({ name });
-//     if (existing) {
-//       return NextResponse.json({ error: "Warehouse name already exists." }, { status: 400 });
-//     }
-
-//     const warehouse = new Warehouse({ name, pincodes });
-//     await warehouse.save();
-
-//     return NextResponse.json({
-//       message: "Warehouse created successfully",
-//       success: true,
-//       warehouse,
-//     });
-
-//   } catch (error: any) {
-//     return NextResponse.json(
-//       { error: error.message || "Internal Server Error" },
-//       { status: 500 }
-//     );
-//   }
-// }
-// import { NextRequest, NextResponse } from 'next/server';
-// import connect from '@/dbConfig/dbConfig';
-// import Warehouse from '@/models/warehouseModel';
-// import bcryptjs from 'bcryptjs';
-
-// connect();
-
-// export async function POST(request: NextRequest) {
-//   try {
-//     const body = await request.json();
-//     const { name, pincodes, manager } = body;
-
-//     if (!name || !pincodes || !Array.isArray(pincodes) || pincodes.length !== 5) {
-//       return NextResponse.json(
-//         { error: 'Name and exactly 5 pincodes are required.' },
-//         { status: 400 }
-//       );
-//     }
-
-//     if (!manager?.username || !manager?.email || !manager?.password) {
-//       return NextResponse.json(
-//         { error: 'Manager username, email, and password are required.' },
-//         { status: 400 }
-//       );
-//     }
-
-//     const existing = await Warehouse.findOne({ name });
-//     if (existing) {
-//       return NextResponse.json({ error: 'Warehouse name already exists.' }, { status: 400 });
-//     }
-
-//     // Check for duplicate manager email/username
-//     const duplicateManager = await Warehouse.findOne({
-//       $or: [
-//         { 'manager.email': manager.email },
-//         { 'manager.username': manager.username },
-//       ],
-//     });
-
-//     if (duplicateManager) {
-//       return NextResponse.json({ error: 'Manager email or username already exists.' }, { status: 400 });
-//     }
-
-//     const hashedPassword = await bcryptjs.hash(manager.password, 10);
-
-//     const warehouse = new Warehouse({
-//       name,
-//       pincodes,
-//       manager: {
-//         username: manager.username,
-//         email: manager.email,
-//         password: hashedPassword,
-//       },
-//     });
-
-//     await warehouse.save();
-
-//     return NextResponse.json({
-//       message: 'Warehouse created successfully',
-//       success: true,
-//       warehouse,
-//     });
-
-//   } catch (error: any) {
-//     return NextResponse.json(
-//       { error: error.message || 'Internal Server Error' },
-//       { status: 500 }
-//     );
-//   }
-// }
 import { NextRequest, NextResponse } from 'next/server';
 import connect from '@/dbConfig/dbConfig';
 import Warehouse from '@/models/warehouseModel';
@@ -182,11 +71,18 @@ export async function POST(request: NextRequest) {
       warehouse: warehouseResponse,
     });
 
-  } catch (error: any) {
-    // Provide more specific error for validation issues
-    if (error.name === 'ValidationError') {
-       return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
-  }
+  } catch (error: unknown) {
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        // Now that we know it's an Error, we can check its name property
+        if (error.name === 'ValidationError') {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        // For all other standard errors
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
+    
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+}
 }

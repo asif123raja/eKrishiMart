@@ -30,8 +30,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-  } catch (error: any) {
-    console.error("Error fetching seller details:", error.message);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  }
+  }  catch (error: unknown) {
+    // Check if the caught item is a standard Error object
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    // Fallback for cases where a non-Error was thrown
+    return NextResponse.json({ error: "An unknown error occurred" }, { status: 400 });
+}
 }

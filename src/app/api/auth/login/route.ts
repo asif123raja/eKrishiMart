@@ -103,10 +103,12 @@ export async function POST(request: NextRequest) {
 
         return response;
 
-    } catch (error: any) {
-        return NextResponse.json(
-            { error: error.message || "Internal server error" },
-            { status: 500 }
-        );
+    } catch (error: unknown) { // 1. Catch as 'unknown'
+    // 2. Check if it's an instance of Error
+    if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    // 3. Handle non-Error exceptions
+       return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
     }
 }

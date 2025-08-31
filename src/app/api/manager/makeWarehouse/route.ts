@@ -3,10 +3,10 @@ import connect from '@/dbConfig/dbConfig';
 import Warehouse from '@/models/warehouseModel';
 import bcryptjs from 'bcryptjs';
 
-connect();
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
     const body = await request.json();
     // ✅ Changed destructuring to match new payload
     const { name, address, serviceablePincodes, manager } = body;

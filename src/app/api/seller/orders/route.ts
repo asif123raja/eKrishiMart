@@ -4,10 +4,12 @@ import { getDataFromToken } from "@/helper/getDataFromToken";
 import Order from "@/models/orderModel";
 
 // Connect to the database
-connect();
+
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
+        console.log("✅ DB Connected");
     // 1. Get the seller's ID from the authentication token
     const tokenData= await getDataFromToken(request);
     if( !tokenData || !tokenData.id){

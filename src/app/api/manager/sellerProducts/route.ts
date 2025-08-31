@@ -5,10 +5,10 @@ import Product from "@/models/productModel";
 import connect from "@/dbConfig/dbConfig";
 import { getDataFromToken } from "@/helper/getDataFromToken";
 
-connect();
 
 export async function GET(req: NextRequest) {
   try {
+    await connect();
     const managerEmail = req.headers.get('x-user-id');
 
     const tokenData = getDataFromToken(req);

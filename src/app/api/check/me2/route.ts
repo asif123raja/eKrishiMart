@@ -4,10 +4,11 @@ import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
 
 // Ensure database connection
-connect();
+
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
     // Extract user ID from token
     const userId = await getDataFromToken(request);
     if (!userId) {

@@ -4,10 +4,11 @@ import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
 import { getDataFromToken } from "@/helper/getDataFromToken";
 
-connect();
 
 export async function GET(req: NextRequest) {
   try {
+    await connect();
+        console.log("✅ DB Connected");
     // Get userId from headers
     // const userId = req.headers.get('x-user-id');
     const response= await getDataFromToken(req);

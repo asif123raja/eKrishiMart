@@ -6,7 +6,7 @@ import Product from "@/models/productModel";
 import connect from "@/dbConfig/dbConfig";
 import { getDataFromToken } from "@/helper/getDataFromToken";
 
-connect();
+
 
 // ✅ Define a type for the populated seller data for better TypeScript support
 interface PopulatedSeller {
@@ -20,6 +20,7 @@ interface PopulatedSeller {
 
 export async function GET(req: NextRequest) {
   try {
+    await connect();
     const tokenData = getDataFromToken(req);
     if( !tokenData || !tokenData.id){
        return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});

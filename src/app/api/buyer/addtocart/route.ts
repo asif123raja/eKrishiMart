@@ -3,10 +3,11 @@ import connect from "@/dbConfig/dbConfig";
 import Buyer from "@/models/userModel";
 import Product from "@/models/productModel";
 
-connect();
+
 
 export async function POST(req: NextRequest) {
   try {
+    await connect();
     const body = await req.json();
     const { buyerId, productId, sku, quantity } = body;
 

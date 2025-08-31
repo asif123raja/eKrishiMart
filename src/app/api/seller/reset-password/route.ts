@@ -63,10 +63,11 @@ import connect from '@/dbConfig/dbConfig';
 import Seller from '@/models/sellerModel';
 import crypto from 'crypto';
 
-connect();
 
 export async function POST(request: NextRequest) {
     try {
+        await connect();
+            console.log("✅ DB Connected");
         console.log("🔹 Incoming RESET PASSWORD request...");
         await connect();
         

@@ -10,7 +10,6 @@ import Product from '@/models/productModel';
 import Seller from '@/models/sellerModel';
 import Warehouse from '@/models/warehouseModel';
 
-connect();
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -221,6 +220,7 @@ export async function POST(request: NextRequest) {
   session.startTransaction();
 
   try {
+    await connect();
     // 1. Verify payment signature
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, shippingAddress } = await request.json();
     

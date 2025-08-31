@@ -3,10 +3,11 @@ import connect from "@/dbConfig/dbConfig";
 import Buyer from "@/models/userModel";
 import { getDataFromToken } from "@/helper/getDataFromToken";
 
-connect();
+
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
     // Get the buyerId from the URL query parameters
     const tokenData = getDataFromToken(request);
     if( !tokenData || !tokenData.id){

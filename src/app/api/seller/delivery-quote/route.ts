@@ -11,7 +11,8 @@ const calculateDeliveryCost = (totalWeight: number) => {
 
 export async function POST(request: NextRequest) {
     try {
-        await connect(); // ✅ ADD THIS LINE to ensure a stable connection
+        await connect();
+            console.log("✅ DB Connected"); // ✅ ADD THIS LINE to ensure a stable connection
 
         const tokenData = await getDataFromToken(request);
         if( !tokenData || !tokenData.id){

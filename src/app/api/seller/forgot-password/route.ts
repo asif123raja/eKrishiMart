@@ -4,7 +4,7 @@ import Seller from '@/models/sellerModel';
 import { sendEmail } from '@/helper/mailer';
 import crypto from 'crypto';
 
-connect();
+
 
 export async function POST(request: NextRequest) {
     try {

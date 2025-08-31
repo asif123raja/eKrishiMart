@@ -3,10 +3,11 @@ import connect from '@/dbConfig/dbConfig';
 import Order from '@/models/orderModel';
 import { getDataFromToken } from '@/helper/getDataFromToken';
 
-connect();
+
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
     // 1. Authenticate the user from their token
     const tokenData = await getDataFromToken(request);
     if( !tokenData || !tokenData.id){

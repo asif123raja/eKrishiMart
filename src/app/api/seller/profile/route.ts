@@ -3,11 +3,12 @@ import { getDataFromToken } from "@/helper/getDataFromToken";
 import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
 
-connect();
 
 // GET: To fetch the current seller's profile data
 export async function GET(request: NextRequest) {
   try {
+    await connect();
+        console.log("✅ DB Connected");
     const tokendata=getDataFromToken(request);
     const sellerId = tokendata?.id;
     const seller = await Seller.findById(sellerId).select("-password"); // Exclude password for security

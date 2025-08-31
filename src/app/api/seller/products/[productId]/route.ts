@@ -87,7 +87,6 @@ import Product from "@/models/productModel";
 import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
 
-connect();
 
 // ✅ Correct interface for Next.js App Router
 interface Context {
@@ -99,6 +98,8 @@ export async function PUT(
   context: Context
 ) {
   try {
+    await connect();
+        console.log("✅ DB Connected");
     // ✅ Await the params promise
     const { productId } = await context.params;
     

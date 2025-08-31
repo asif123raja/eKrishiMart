@@ -9,8 +9,7 @@ import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import Razorpay from 'razorpay';
 
-connect();
-console.log("✅ DB Connected");
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -28,6 +27,8 @@ console.log("✅ Razorpay Configured");
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
+    console.log("✅ DB Connected");
     console.log("🚀 API Called: Product Upload");
 
     // 1. AUTHENTICATION & SELLER VALIDATION

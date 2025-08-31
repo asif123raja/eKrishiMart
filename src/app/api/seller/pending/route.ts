@@ -4,10 +4,11 @@ import { getDataFromToken } from "@/helper/getDataFromToken";
 // ✅ 1. Import the correct model
 import PendingProduct from "@/models/pendingProductModel"; 
 
-connect();
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
+        console.log("✅ DB Connected");
     // 2. Get the seller's ID from their login token
     const response = await getDataFromToken(request);
     const sellerId = response?.id;

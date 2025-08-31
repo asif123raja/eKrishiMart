@@ -3,12 +3,13 @@ import connect from "@/dbConfig/dbConfig";
 import Buyer from "@/models/userModel";
 import { getDataFromToken } from "@/helper/getDataFromToken";
 
-connect();
+
 
 // POST - Add a new shipping address
 // In your PUT/POST endpoints:
 export async function POST(request: NextRequest) {
   try {
+    await connect();
     const tokenData = getDataFromToken(request);
     if (!tokenData || !tokenData.id) {
         return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });

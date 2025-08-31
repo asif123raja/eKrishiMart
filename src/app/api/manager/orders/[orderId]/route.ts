@@ -66,7 +66,6 @@ import connect from '@/dbConfig/dbConfig';
 import Order from '@/models/orderModel';
 import { getDataFromToken } from '@/helper/getDataFromToken';
 
-connect();
 
 // ✅ Correct interface for Next.js App Router
 interface Context {
@@ -75,6 +74,7 @@ interface Context {
 
 export async function PUT(request: NextRequest, context: Context) {
   try {
+    await connect();
     // ✅ Await the params promise
     const { orderId } = await context.params;
     const { action, payload } = await request.json();

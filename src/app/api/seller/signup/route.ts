@@ -153,7 +153,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcryptjs from "bcryptjs";
 import { sendEmail } from '@/helper/mailer';
 
-connect();
 
 // Helper function to generate SKU
 function generateSku() {
@@ -167,6 +166,8 @@ function generateSku() {
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
+        console.log("✅ DB Connected");
     const reqBody = await request.json();
     console.log("Incoming seller request body:", reqBody);
 

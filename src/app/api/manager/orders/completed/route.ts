@@ -4,10 +4,10 @@ import Order from '@/models/orderModel';
 import Seller from '@/models/sellerModel';
 import { getDataFromToken } from '@/helper/getDataFromToken';
 
-connect();
 
 export async function GET(request: NextRequest) {
   try {
+    await connect();
     const tokenData = await getDataFromToken(request);
     if( !tokenData || !tokenData.id){
       return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});

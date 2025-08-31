@@ -64,7 +64,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connect from "@/dbConfig/dbConfig";
 import Product from "@/models/productModel";
 
-connect();
+
 
 // ✅ Correct interface for Next.js App Router
 interface Context {
@@ -73,6 +73,7 @@ interface Context {
 
 export async function GET(request: NextRequest, context: Context) {
   try {
+    await connect();
     // ✅ Await the params promise
     const { itemId } = await context.params;
     

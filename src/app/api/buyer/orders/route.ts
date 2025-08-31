@@ -59,7 +59,7 @@ const PLATFORM_FEE = 3;
 const INVENTORY_FEE = 5;
 const GST_RATE = 0.18;
 
-connect();
+
 
 
 
@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
   session.startTransaction();
 
   try {
+    await connect();
     // 1. Authentication
     const tokenData = await getDataFromToken(request);
     if( !tokenData || !tokenData.id){

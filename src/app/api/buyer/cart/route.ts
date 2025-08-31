@@ -4,13 +4,14 @@ import connect from '@/dbConfig/dbConfig';
 import Buyer from '@/models/userModel';
 import { getDataFromToken } from '@/helper/getDataFromToken';
 
-connect();
+// connect();
 
 // -------------------------------
 // GET CART ITEMS
 // -------------------------------
 export async function GET(req: NextRequest) {
   try {
+    await connect();
     const tokenData = getDataFromToken(req);
         if( !tokenData || !tokenData.id){
            return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});

@@ -4,13 +4,14 @@ import Product from '@/models/productModel';
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 
-connect();
+
 
 export async function POST(request: NextRequest) {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+    await connect();
     const { pendingProductId, action } = await request.json();
 
     if (!pendingProductId || !['approve', 'reject'].includes(action)) {

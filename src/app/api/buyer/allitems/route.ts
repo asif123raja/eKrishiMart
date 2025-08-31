@@ -21,7 +21,7 @@ interface PopulatedSeller {
 export async function GET(req: NextRequest) {
   try {
     await connect();
-    const tokenData = getDataFromToken(req);
+    const tokenData = await getDataFromToken(req);
     if( !tokenData || !tokenData.id){
        return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
     }

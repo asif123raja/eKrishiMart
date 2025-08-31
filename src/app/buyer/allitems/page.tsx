@@ -40,65 +40,65 @@ type Product = {
 export default function NearbyWarehouseProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const userId = sessionStorage.getItem("userId");
+        // Check if we're on client side
+        if (typeof window === 'undefined') return;
+
         const res = await fetch("/api/buyer/allitems", {
-          headers: {
-            "Content-Type": "application/json",
-            "x-user-id": userId || "",
-          },
+          credentials: 'include'
         });
 
-        const data = await res.json();
-        if (res.ok) {
-          setProducts(data.products);
-        } else {
-          alert(data.error || "Failed to load products");
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
         }
+
+        const data = await res.json();
+        setProducts(data.products || []);
+        setError(null);
       } catch (err: unknown) {
-    console.error(err);
-    // Check if the caught item is a standard Error object
-    if (err instanceof Error) {
-        alert("Error fetching products: " + err.message);
-    } else {
-        // Handle cases where a non-Error was thrown
-        alert("An unknown error occurred while fetching products");
+        console.error("Fetch error:", err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
+      } finally {
+        setLoading(false);
+      }
     }
-}
-    }
+
     fetchProducts();
   }, []);
 
   const handleItemClick = (product: Product) => {
-    // Store the product data in sessionStorage
-    sessionStorage.setItem("itemData", JSON.stringify({
-      _id: product._id,
-      name: product.name,
-      image: product.imageUrl,
-      description: product.description,
-      calories: product.nutrition.calories,
-      protein: product.nutrition.protein,
-      vitamins: {},
-      minerals: product.minerals,
-      price: product.pricing.basePrice,
-      discounted_price: product.pricing.discountedPrice,
-      currency: product.pricing.currency,
-      quantity: product.itemQuantity,
-      bulkPricing: product.pricing.bulkPricing || [],
-      seller: product.seller
-    }));
-    
-    // Navigate to the item detail page
-    router.push(`/buyer/item/${encodeURIComponent(product.name)}`);
+    try {
+      sessionStorage.setItem("itemData", JSON.stringify({
+        _id: product._id,
+        name: product.name,
+        image: product.imageUrl,
+        description: product.description,
+        calories: product.nutrition.calories,
+        protein: product.nutrition.protein,
+        vitamins: {},
+        minerals: product.minerals,
+        price: product.pricing.basePrice,
+        discounted_price: product.pricing.discountedPrice,
+        currency: product.pricing.currency,
+        quantity: product.itemQuantity,
+        bulkPricing: product.pricing.bulkPricing || [],
+        seller: product.seller
+      }));
+      
+      router.push(`/buyer/item/${encodeURIComponent(product.name)}`);
+    } catch (err) {
+      console.error("Error storing item data:", err);
+    }
   };
-
-  if (loading) return <p>Loading products...</p>;
-  if (products.length === 0)
-    return <p>No products available in your warehouse region.</p>;
 
   const truncateDescription = (description: string, wordCount: number) => {
     const words = description.split(" ");
@@ -107,15 +107,30 @@ export default function NearbyWarehouseProducts() {
       : description;
   };
 
+  if (loading) return <p className="p-6">Loading products...</p>;
+  
+  if (error) return <p className="p-6 text-red-500">Error: {error}</p>;
+  
+  if (products.length === 0) {
+    return <p className="p-6">No products available in your warehouse region.</p>;
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Products in Your Warehouse Region</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {products.map((product) => (
-          <div 
+          <article 
             key={product._id} 
             className="border rounded-lg p-4 shadow cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => handleItemClick(product)}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleItemClick(product);
+              }
+            }}
           >
             <Card
               _id={product._id}
@@ -139,7 +154,7 @@ export default function NearbyWarehouseProducts() {
               }}
               seller={product.seller}
             />
-          </div>
+          </article>
         ))}
       </div>
     </div>

@@ -21,27 +21,33 @@ export default function ManagerProductsPage() {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
-      const managerEmail = sessionStorage.getItem('userEmail');
-      // ✅ ADD THIS LINE
-      console.log("Sending this email to backend:", managerEmail);
-      
-      if (!managerEmail) {
-        toast.error("Please login first");
-        setLoading(false);
-        return;
-      }
+  setLoading(true);
+  
+  // ✅ REMOVE sessionStorage usage
+  // const managerEmail = sessionStorage.getItem('userEmail');
+  // console.log("Sending this email to backend:", managerEmail);
+  
+  // ✅ REMOVE the manual header
+  // if (!managerEmail) {
+  //   toast.error("Please login first");
+  //   setLoading(false);
+  //   return;
+  // }
 
-      const res = await fetch("/api/manager/sellerProducts", {
-        headers: { 'x-user-id': managerEmail }
-      });
+  const res = await fetch("/api/manager/sellerProducts", {
+    // ✅ REMOVE manual header
+    // headers: { 'x-user-id': managerEmail }
+    
+    // ✅ ADD credentials to send cookies automatically
+    credentials: 'include'
+  });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to fetch data");
-      }
-      setSellers(data.data || []);
-    } catch (error) {
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to fetch data");
+  }
+  setSellers(data.data || []);
+}catch (error) {
       console.error("Fetch error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to load data");
     } finally {
@@ -55,35 +61,26 @@ export default function ManagerProductsPage() {
 
   const handleQuantityUpdate = async (productId: string, newQuantity: number) => {
     try {
-      setUpdatingProducts(prev => ({ ...prev, [productId]: true }));
-      
-      // ✅ FIX: Use 'userEmail' to be consistent with fetchData
-      const managerEmail = sessionStorage.getItem('userEmail');
-      
-      if (!managerEmail) {
-        toast.error("Session expired. Please login again.");
-        return;
-      }
+  setUpdatingProducts(prev => ({ ...prev, [productId]: true }));
 
-      if (isNaN(newQuantity) || newQuantity < 0) {
-        toast.error("Please enter a valid quantity");
-        return;
-      }
+  if (isNaN(newQuantity) || newQuantity < 0) {
+    toast.error("Please enter a valid quantity");
+    return;
+  }
 
-      const res = await fetch(`/api/manager/sellerProducts/${productId}`, {
-        method: "PUT",
-        headers: {
-          'Content-Type': 'application/json',
-          // ✅ FIX: Send the manager's email, not their ID
-          'x-user-id': managerEmail
-        },
-        body: JSON.stringify({ quantity: newQuantity })
-      });
+  const res = await fetch(`/api/manager/sellerProducts/${productId}`, {
+    method: "PUT",
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // ✅ Send cookies automatically
+    body: JSON.stringify({ quantity: newQuantity })
+  });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to update");
-      }
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to update");
+  }
 
       // Update state for a smooth user experience
       setSellers(prev => 

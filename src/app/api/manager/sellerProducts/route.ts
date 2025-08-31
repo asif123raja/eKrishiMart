@@ -9,18 +9,18 @@ import { getDataFromToken } from "@/helper/getDataFromToken";
 export async function GET(req: NextRequest) {
   try {
     await connect();
-    const managerEmail = req.headers.get('x-user-id');
+    // const managerEmail = req.headers.get('x-user-id');
 
-    const tokenData = getDataFromToken(req);
+    const tokenData = await getDataFromToken(req);
     if( !tokenData || !tokenData.id){
               return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
             }
 
         // 2. Access the userId and userEmail from the returned object
         const userId = tokenData.id;
-        const userEmail = tokenData.email;
+        const managerEmail = tokenData.email;
 
-        console.log(`User ID from token: ${userId}, Email from token : ${userEmail} dekha na mazaaa`);
+        console.log(`User ID from token: ${userId}, Email from token : ${managerEmail } dekha na mazaaa`);
     
     // ✅ FIX: Check for a valid string, not an ObjectId
     if (!managerEmail) {

@@ -73,6 +73,7 @@ import Warehouse from "@/models/warehouseModel";
 import Product from "@/models/productModel";
 import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
+import { getDataFromToken } from "@/helper/getDataFromToken";
 
 connect();
 
@@ -85,8 +86,16 @@ export async function PUT(req: NextRequest, context: Context) {
   try {
     // ✅ Await the params promise
     const { productId } = await context.params;
+    const tokenData = await getDataFromToken(req);
+        if( !tokenData || !tokenData.id){
+                  return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});
+                }
     
-    const managerEmail = req.headers.get('x-user-id');
+            // 2. Access the userId and userEmail from the returned object
+            const userId = tokenData.id;
+            const managerEmail = tokenData.email;
+    
+    // const managerEmail = req.headers.get('x-user-id');
     
     // ✅ Check for a valid string, not an ObjectId
     if (!managerEmail) {

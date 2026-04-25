@@ -11,11 +11,6 @@ import Seller from '@/models/sellerModel';
 import Warehouse from '@/models/warehouseModel';
 
 
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_SECRET_ID!,
-});
-
 // Constants
 const PLATFORM_FEE = 3;
 const INVENTORY_FEE = 5;
@@ -221,6 +216,19 @@ export async function POST(request: NextRequest) {
 
   try {
     await connect();
+
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET_ID) {
+      return NextResponse.json(
+        { error: "Missing Razorpay credentials" },
+        { status: 500 }
+      );
+    }
+
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET_ID,
+    });
+
     // 1. Verify payment signature
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, shippingAddress } = await request.json();
     

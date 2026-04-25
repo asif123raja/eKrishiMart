@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { getDataFromToken } from "@/helper/getDataFromToken";
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_SECRET_ID!,
-});
 
 interface RazorpayOrder {
   id: string;
@@ -15,6 +11,11 @@ interface RazorpayOrder {
 
 export async function POST(request: NextRequest) {
   try {
+    const razorpay = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_SECRET_ID!,
+    });
+
     const tokenData = await getDataFromToken(request);
         if( !tokenData || !tokenData.id){
                   return NextResponse.json({ error: "Unauthorized: Invalid token"}, { status: 401});

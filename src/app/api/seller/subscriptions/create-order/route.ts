@@ -4,7 +4,6 @@ import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
 import Razorpay from 'razorpay'; 
 
-connect();
 
 const razorpay = new Razorpay({
     key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -23,7 +22,7 @@ const priceMap: { [key: string]: { [key: string]: number } } = {
 export async function POST(request: NextRequest) {
     try {
         await connect();
-        const token = getDataFromToken(request);
+        const token =await getDataFromToken(request);
         if (!token || !token.id) {
             return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
         }

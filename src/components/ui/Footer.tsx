@@ -3,15 +3,15 @@ import { FaFacebook, FaTwitter, FaInstagram, FaPhoneAlt, FaEnvelope } from "reac
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-teal-100 text-teal-950 py-6">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+    <footer className="bg-teal-900 text-teal-50 py-12 mt-16 shadow-inner">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0 px-6">
         {/* App Info */}
-        <div className="text-center md:text-left">
-          <span className="text-white text-3xl font-bold">
-            <span className="text-purple-600">Krishi</span>
-            <span className="text-gray-600">Mart</span>
+        <div className="text-center md:text-left flex flex-col items-center md:items-start">
+          <span className="text-white text-3xl font-extrabold tracking-wide">
+            <span className="text-lime-400">Krishi</span>
+            <span className="text-white">Mart</span>
           </span>
-          <p className="text-sm mt-2">Your go-to marketplace for fresh vegetables and more.</p>
+          <p className="text-teal-200 text-sm mt-3 max-w-xs">Your premium go-to marketplace for fresh, organic vegetables and more.</p>
         </div>
 
         {/* Contact Information */}
@@ -31,15 +31,15 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Social Media Icons */}
-        <div className="flex justify-center md:justify-end space-x-4">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500">
-            <FaFacebook size={24} />
+        <div className="flex justify-center md:justify-end space-x-6 mt-4 md:mt-0">
+          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400 hover:scale-125 hover:-translate-y-1 transition-all duration-300">
+            <FaFacebook size={26} />
           </a>
-          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500">
-            <FaTwitter size={24} />
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400 hover:scale-125 hover:-translate-y-1 transition-all duration-300">
+            <FaTwitter size={26} />
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500">
-            <FaInstagram size={24} />
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-lime-400 hover:scale-125 hover:-translate-y-1 transition-all duration-300">
+            <FaInstagram size={26} />
           </a>
         </div>
       </div>

@@ -63,15 +63,17 @@ const Card: React.FC<CardProps> = ({ _id, image, name, description, itemData, se
     <Link
       href={`/buyer/item/${name}`}
       onClick={handleClick}
-      className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
+      className="group bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col"
     >
-      <Image
-        src={image}
-        alt={name}
-        className="w-full h-48 object-cover"
-        width={400}
-        height={200}
-      />
+      <div className="overflow-hidden">
+        <Image
+          src={image}
+          alt={name}
+          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+          width={400}
+          height={200}
+        />
+      </div>
       <div className="p-4">
         <h3 className="text-xl font-semibold text-center">{name}</h3>
         <p className="text-gray-700 text-sm text-center mt-1">{description}</p>

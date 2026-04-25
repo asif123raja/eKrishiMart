@@ -75,7 +75,7 @@ import Seller from "@/models/sellerModel";
 import connect from "@/dbConfig/dbConfig";
 import { getDataFromToken } from "@/helper/getDataFromToken";
 
-connect();
+
 
 // ✅ Correct interface for Next.js App Router
 interface Context {

@@ -5,14 +5,9 @@ import connect from "@/dbConfig/dbConfig";
 import Razorpay from 'razorpay'; 
 
 
-const razorpay = new Razorpay({
-    key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_SECRET_ID!,
-});
 
-// ✅ 1. Use TypeScript's `Parameters` to get the correct options type automatically.
-// This creates a new type alias called 'RazorpayOrderOptions'.
-type RazorpayOrderOptions = Parameters<typeof razorpay.orders.create>[0];
+
+
 
 const priceMap: { [key: string]: { [key: string]: number } } = {
     basic: { pro: 1000, enterprise: 3000 },
@@ -21,6 +16,15 @@ const priceMap: { [key: string]: { [key: string]: number } } = {
 
 export async function POST(request: NextRequest) {
     try {
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET_ID) {
+            return NextResponse.json({ error: "Missing Razorpay config" }, { status: 500 });
+        }
+        
+        const razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_SECRET_ID,
+        });
+
         await connect();
         const token =await getDataFromToken(request);
         if (!token || !token.id) {
@@ -43,7 +47,7 @@ export async function POST(request: NextRequest) {
         const amount = priceMap[currentPlan][targetPlan];
         
         // ✅ 2. Use the new, correct type for your 'options' object.
-        const options: RazorpayOrderOptions = {
+        const options = {
             amount: amount * 100,
             currency: "INR",
             receipt: `sub_${seller._id.toString()}_${targetPlan}`,

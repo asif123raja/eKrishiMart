@@ -11,25 +11,32 @@ import Razorpay from 'razorpay';
 
 
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-console.log("✅ Cloudinary Configured");
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_SECRET_ID!,
-});
-console.log("✅ Razorpay Configured");
 
 export async function POST(request: NextRequest) {
   try {
     await connect();
     console.log("✅ DB Connected");
     console.log("🚀 API Called: Product Upload");
+
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return NextResponse.json({ error: "Missing Cloudinary configuration" }, { status: 500 });
+    }
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+    console.log("✅ Cloudinary Configured");
+
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET_ID) {
+      return NextResponse.json({ error: "Missing Razorpay configuration" }, { status: 500 });
+    }
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET_ID,
+    });
+    console.log("✅ Razorpay Configured");
 
     // 1. AUTHENTICATION & SELLER VALIDATION
     const cookieStore = await cookies();
